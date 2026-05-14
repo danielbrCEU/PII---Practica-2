@@ -17,7 +17,7 @@ struct Punto {
     }
 
     bool operator<=(const Punto& other) const {
-        return y <= other.y || (y == other.y && x <= other.x);
+        return *this < other || *this == other;
     }
 
     bool operator>=(const Punto& other) const {

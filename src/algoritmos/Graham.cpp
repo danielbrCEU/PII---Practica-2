@@ -2,24 +2,6 @@
 #include "../Punto.h"
 #include "../Geometria.h"
 #include "MergeSort.h"
-#include <stack>
-#include <algorithm>
-
-// Helper: copia el stack a un vector para poder iterar
-static std::vector<Punto> stack_a_vector(std::stack<Punto> pila) {
-    std::vector<Punto> resultado;
-    while (!pila.empty()) {
-        resultado.push_back(pila.top());
-        pila.pop();
-    }
-    std::reverse(resultado.begin(), resultado.end());
-    return resultado;
-}
-
-static void dibujar_envolvente(Ventana& ventana, std::vector<Punto>& puntos, std::stack<Punto>& pila) {
-    std::vector<Punto> hull = stack_a_vector(pila);
-    ventana.dibujar_envolvente(puntos, hull);
-}
 
 void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
 
@@ -56,22 +38,20 @@ void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
         return;
     }
 
-    // 5: Crear pila y empujar los 3 primeros
-    std::stack<Punto> pila;
-    pila.push(filtrados[0]);
-    pila.push(filtrados[1]);
-    pila.push(filtrados[2]);
+    // 4: Crear pila (vector) y empujar los 3 primeros
+    std::vector<Punto> pila;
+    pila.push_back(filtrados[0]);
+    pila.push_back(filtrados[1]);
+    pila.push_back(filtrados[2]);
 
-    dibujar_envolvente(ventana, puntos, pila);
+    ventana.dibujar_envolvente(puntos, pila);
 
-    // 6: Procesar los m-3 puntos restantes
+    // 5: Procesar los m-3 puntos restantes
     for (int i = 3; i < m; i++) {
-        // 6.1: Quitar puntos mientras no giren a la izquierda (antihorario)
+        // 5.1: Quitar puntos mientras no giren a la izquierda (antihorario)
         while (pila.size() > 1) {
-            Punto top = pila.top();
-            pila.pop();
-            Punto second = pila.top();
-            pila.push(top);
+            Punto top = pila.back();
+            Punto second = pila[pila.size() - 2];
 
             float orient = Geometria::orientacion_tripleta(second, top, filtrados[i]);
             if (orient < 0) {
@@ -79,11 +59,11 @@ void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
                 break;
             }
             // Giro horario o colineal: sacamos top
-            pila.pop();
-            dibujar_envolvente(ventana, puntos, pila);
+            pila.pop_back();
+            ventana.dibujar_envolvente(puntos, pila);
         }
-        // 6.2: Empujar punto actual
-        pila.push(filtrados[i]);
-        dibujar_envolvente(ventana, puntos, pila);
+        // 5.2: Empujar punto actual
+        pila.push_back(filtrados[i]);
+        ventana.dibujar_envolvente(puntos, pila);
     }
 }

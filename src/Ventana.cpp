@@ -7,7 +7,7 @@
 
 Ventana::Ventana()
 {
-    window.create(sf::VideoMode({400, 400}), "Four dots");
+    window.create(sf::VideoMode({400, 400}), "Practica Algoritmo de Graham");
     sf::View view(sf::FloatRect({0.f, 400.f}, {400.f, -400.f}));
     window.setView(view);
 }
@@ -77,5 +77,7 @@ void Ventana::dibujar_envolvente(std::vector<Punto>& puntos, std::vector<Punto>&
     }
 
     mostrar();
+
+    // Introducimos sleep para ver paso a paso el algoritmo
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }

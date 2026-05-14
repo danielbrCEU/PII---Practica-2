@@ -4,6 +4,7 @@
 
 void MergeSort::ordenar_por_y(std::vector<Punto> &puntos)
 {
+    if (puntos.size() <= 1) return;
     merge_sort(puntos, 0, puntos.size() - 1);
 }
 
