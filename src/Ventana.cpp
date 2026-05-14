@@ -1,6 +1,4 @@
 #include "Ventana.h"
-#include <thread>
-#include <chrono>
 
 Ventana::Ventana()
 {
@@ -38,7 +36,7 @@ void Ventana::dibujar_punto_rojo(Punto punto) {
     window.draw(dot);
 }
 
-void Ventana::dibujar_puntos(std::vector<Punto>& puntos) {
+void Ventana::dibujar_puntos(const std::vector<Punto>& puntos) {
     sf::CircleShape dot(5.f);
     dot.setFillColor(sf::Color::White);
     dot.setOrigin({5.f, 5.f});
@@ -58,7 +56,7 @@ void Ventana::dibujar_linea(Punto a, Punto b) {
     window.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
-void Ventana::dibujar_envolvente(std::vector<Punto>& puntos, std::vector<Punto>& envolvente) {
+void Ventana::dibujar_envolvente(const std::vector<Punto>& puntos, const std::vector<Punto>& envolvente) {
     iniciar();
     dibujar_puntos(puntos);
 
@@ -74,7 +72,4 @@ void Ventana::dibujar_envolvente(std::vector<Punto>& puntos, std::vector<Punto>&
     }
 
     mostrar();
-
-    // Introducimos sleep para ver paso a paso el algoritmo
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }

@@ -6,5 +6,5 @@
 class Graham
 {
     public:
-        void convex_hull(std::vector<Punto>& puntos, Ventana& ventana);
+        std::vector<Punto> envolvente_convexo(std::vector<Punto>& puntos, Ventana& ventana);
 };

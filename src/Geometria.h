@@ -10,5 +10,6 @@ class Geometria
         static float orientacion_tripleta(Punto p, Punto q, Punto r);
         // Distancia al cuadrado entre dos puntos
         static float distancia(Punto p, Punto q);
+        // Generar puntos aleatorios
         static std::vector<Punto> generar_puntos(int n, int min, int max);
 };

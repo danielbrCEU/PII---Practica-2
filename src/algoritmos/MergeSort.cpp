@@ -73,13 +73,13 @@ void MergeSort::merge(std::vector<Punto> &puntos, int left, int mid, int right)
     }
 }
 
-void MergeSort::ordenar_por_angulo(std::vector<Punto> &puntos, Punto pivot)
+void MergeSort::ordenar_por_angulo(std::vector<Punto> &puntos, Punto referencia)
 {
     if (puntos.size() <= 1) return;
-    merge_sort_angulo(puntos, 0, puntos.size() - 1, pivot);
+    merge_sort_angulo(puntos, 0, puntos.size() - 1, referencia);
 }
 
-void MergeSort::merge_sort_angulo(std::vector<Punto> &puntos, int left, int right, Punto pivot)
+void MergeSort::merge_sort_angulo(std::vector<Punto> &puntos, int left, int right, Punto referencia)
 {
     if (left >= right)
     {
@@ -87,12 +87,12 @@ void MergeSort::merge_sort_angulo(std::vector<Punto> &puntos, int left, int righ
     }
 
     int mid = left + (right - left) / 2;
-    merge_sort_angulo(puntos, left, mid, pivot);
-    merge_sort_angulo(puntos, mid + 1, right, pivot);
-    merge_angulo(puntos, left, mid, right, pivot);
+    merge_sort_angulo(puntos, left, mid, referencia);
+    merge_sort_angulo(puntos, mid + 1, right, referencia);
+    merge_angulo(puntos, left, mid, right, referencia);
 }
 
-void MergeSort::merge_angulo(std::vector<Punto> &puntos, int left, int mid, int right, Punto pivot)
+void MergeSort::merge_angulo(std::vector<Punto> &puntos, int left, int mid, int right, Punto referencia)
 {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -109,9 +109,9 @@ void MergeSort::merge_angulo(std::vector<Punto> &puntos, int left, int mid, int 
 
     while (i < n1 && j < n2)
     {
-        float orient = Geometria::orientacion_tripleta(pivot, L[i], R[j]);
+        float orient = Geometria::orientacion_tripleta(referencia, L[i], R[j]);
         // L[i] va antes si orient < 0 (antihorario), o si colineales y mas cercano
-        if (orient < 0 || (orient == 0 && Geometria::distancia(pivot, L[i]) <= Geometria::distancia(pivot, R[j])))
+        if (orient < 0 || (orient == 0 && Geometria::distancia(referencia, L[i]) <= Geometria::distancia(referencia, R[j])))
         {
             puntos[k] = L[i];
             i++;

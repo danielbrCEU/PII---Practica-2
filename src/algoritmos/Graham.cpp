@@ -1,23 +1,29 @@
 #include "Graham.h"
 #include "MergeSort.h"
 #include "../Geometria.h"
+#include <thread>
+#include <chrono>
 
+static void animar(Ventana& ventana, const std::vector<Punto>& puntos, const std::vector<Punto>& envolvente) {
+    ventana.dibujar_envolvente(puntos, envolvente);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+}
 
-void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
+std::vector<Punto> Graham::envolvente_convexo(std::vector<Punto>& puntos, Ventana& ventana) {
 
     int n = puntos.size();
     if (n < 3) {
-        return;
+        return {};
     }
 
     // 1: Ordenar puntos (el mas bajo queda en puntos[0])
     MergeSort ms;
     ms.ordenar_por_y(puntos);
-    Punto pivot = puntos[0];
+    Punto referencia = puntos[0];
 
-    // 2: Ordenar los n-1 puntos restantes por angulo polar respecto a pivot
+    // 2: Ordenar los n-1 puntos restantes por angulo polar respecto a referencia
     std::vector<Punto> restantes(puntos.begin() + 1, puntos.end());
-    ms.ordenar_por_angulo(restantes, pivot);
+    ms.ordenar_por_angulo(restantes, referencia);
     for (int i = 0; i < (int)restantes.size(); i++) {
         puntos[i + 1] = restantes[i];
     }
@@ -27,7 +33,7 @@ void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
     filtrados.push_back(puntos[0]);
     for (int i = 1; i < n; i++) {
         // Saltar puntos con mismo angulo que el siguiente (quedarse con el ultimo = mas lejano)
-        while (i < n - 1 && Geometria::orientacion_tripleta(pivot, puntos[i], puntos[i + 1]) == 0) {
+        while (i < n - 1 && Geometria::orientacion_tripleta(referencia, puntos[i], puntos[i + 1]) == 0) {
             i++;
         }
         filtrados.push_back(puntos[i]);
@@ -35,23 +41,23 @@ void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
 
     int m = filtrados.size();
     if (m < 3) {
-        return;
+        return {};
     }
 
-    // 4: Crear pila (vector) y empujar los 3 primeros
-    std::vector<Punto> pila;
-    pila.push_back(filtrados[0]);
-    pila.push_back(filtrados[1]);
-    pila.push_back(filtrados[2]);
+    // 4: Crear envolvente (usada como pila) y empujar los 3 primeros
+    std::vector<Punto> envolvente;
+    envolvente.push_back(filtrados[0]);
+    envolvente.push_back(filtrados[1]);
+    envolvente.push_back(filtrados[2]);
 
-    ventana.dibujar_envolvente(puntos, pila);
+    animar(ventana, puntos, envolvente);
 
     // 5: Procesar los m-3 puntos restantes
     for (int i = 3; i < m; i++) {
         // 5.1: Quitar puntos mientras no giren a la izquierda (antihorario)
-        while (pila.size() > 1) {
-            Punto top = pila.back();
-            Punto second = pila[pila.size() - 2];
+        while (envolvente.size() > 1) {
+            Punto top = envolvente.back();
+            Punto second = envolvente[envolvente.size() - 2];
 
             float orient = Geometria::orientacion_tripleta(second, top, filtrados[i]);
             if (orient < 0) {
@@ -59,11 +65,13 @@ void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
                 break;
             }
             // Giro horario o colineal: sacamos top
-            pila.pop_back();
-            ventana.dibujar_envolvente(puntos, pila);
+            envolvente.pop_back();
+            animar(ventana, puntos, envolvente);
         }
         // 5.2: Empujar punto actual
-        pila.push_back(filtrados[i]);
-        ventana.dibujar_envolvente(puntos, pila);
+        envolvente.push_back(filtrados[i]);
+        animar(ventana, puntos, envolvente);
     }
+
+    return envolvente;
 }
