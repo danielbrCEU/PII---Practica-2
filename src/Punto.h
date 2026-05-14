@@ -5,14 +5,22 @@ struct Punto {
     int y;
 
     bool operator==(const Punto& other) const {
-        return x == other.x && y == other.y;
+        return y == other.y && x == other.x;
     }
 
     bool operator<(const Punto& other) const {
-        return x < other.x || (x == other.x && y < other.y);
+        return y < other.y || (y == other.y && x < other.x);
     }
 
     bool operator>(const Punto& other) const {
         return other < *this; // reutiliza el 
+    }
+
+    bool operator<=(const Punto& other) const {
+        return *this < other || *this == other;
+    }
+
+    bool operator>=(const Punto& other) const {
+        return other <= *this;
     }
 };

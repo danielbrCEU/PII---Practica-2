@@ -1,34 +1,45 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "Punto.h"
 #include "algoritmos/Graham.h"
 #include "algoritmos/MergeSort.h"
+#include "Ventana.h"
+
+std::vector<Punto> generar_puntos(int n, int min, int max) {
+    std::vector<Punto> puntos;
+    srand(time(0));
+
+    for (int i = 0; i < n; i++) {
+        int x = rand() % (max - min + 1) + min;
+        int y = rand() % (max - min + 1) + min;
+        puntos.push_back({x, y});
+    }
+    return puntos;
+}
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({400, 400}), "Four dots");
+    
+    Ventana ventana;
+    ventana.iniciar();
+    
+    std::vector<Punto> puntos = generar_puntos(18, 5, 395);
+    ventana.dibujar_puntos(puntos);
 
-    sf::CircleShape dot(5.f);
-    dot.setFillColor(sf::Color::White);
-    dot.setOrigin({5.f, 5.f});
+    MergeSort ms;
+    ms.ordenar_por_y(puntos);
 
-    std::vector<Punto> puntos = {{100, 100}, {300, 100}, {100, 300}, {300, 300}, {200, 200}, {210, 210}};
+    for (const Punto& p : puntos)
+        std::cout << "(" << p.x << ", " << p.y << ")\n";
 
-    while (window.isOpen())
+
+    Graham algoritmoGraham;
+    algoritmoGraham.convex_hull(puntos, ventana);
+
+    while (ventana.esta_abierta())
     {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
-
-        window.clear(sf::Color::Black);
-
-        for (const auto& punto : puntos)
-        {
-            dot.setPosition({static_cast<float>(punto.x), static_cast<float>(punto.y)});
-            window.draw(dot);
-        }
-
-        window.display();
+        ventana.procesar();
     }
 }
