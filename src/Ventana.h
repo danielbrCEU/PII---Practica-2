@@ -3,6 +3,7 @@
 #include <vector>
 #include "Punto.h"
 
+
 class Ventana
 {
     public:

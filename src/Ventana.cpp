@@ -1,9 +1,6 @@
-#include <SFML/Graphics.hpp>
-#include <vector>
+#include "Ventana.h"
 #include <thread>
 #include <chrono>
-#include "Punto.h"
-#include "Ventana.h"
 
 Ventana::Ventana()
 {

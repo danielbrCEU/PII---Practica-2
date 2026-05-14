@@ -1,7 +1,7 @@
 #include "Graham.h"
-#include "../Punto.h"
-#include "../Geometria.h"
 #include "MergeSort.h"
+#include "../Geometria.h"
+
 
 void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
 

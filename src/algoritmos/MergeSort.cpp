@@ -1,5 +1,4 @@
 #include "MergeSort.h"
-#include "../Punto.h"
 #include "../Geometria.h"
 
 void MergeSort::ordenar_por_y(std::vector<Punto> &puntos)

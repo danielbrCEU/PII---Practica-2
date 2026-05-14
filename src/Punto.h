@@ -13,7 +13,7 @@ struct Punto {
     }
 
     bool operator>(const Punto& other) const {
-        return other < *this; // reutiliza el 
+        return other < *this;
     }
 
     bool operator<=(const Punto& other) const {
