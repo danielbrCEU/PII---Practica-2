@@ -6,19 +6,14 @@ Graham::Graham()
 
 }
 
-Graham::~Graham()
-{
-
-}
-
-Graham::ordenar_puntos(std::vector<Punto>& puntos) {
+void Graham::ordenar_puntos(std::vector<Punto>& puntos) {
     
 }
 
-Graham::orientacion_tripleta(Punto p, Punto q, Punto r) {
-    
+float Graham::orientacion_tripleta(Punto p, Punto q, Punto r) {
+    return 0.0f;
 }
 
-Graham::distancia(Punto p, Punto q) {
-    
+float Graham::distancia(Punto p, Punto q) {
+    return 0.0f;
 }

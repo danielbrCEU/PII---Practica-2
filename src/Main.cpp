@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "Punto.h"
 #include "algoritmos/Graham.h"
 #include "algoritmos/MergeSort.h"
@@ -12,6 +13,13 @@ int main()
     dot.setOrigin({5.f, 5.f});
 
     std::vector<Punto> puntos = {{100, 100}, {300, 100}, {100, 300}, {300, 300}, {200, 200}, {210, 210}};
+
+
+    MergeSort ms;
+    ms.ordenar(puntos);
+
+    for (const auto& p : puntos)
+        std::cout << "(" << p.x << ", " << p.y << ")\n";
 
     while (window.isOpen())
     {

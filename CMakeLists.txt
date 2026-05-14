@@ -8,6 +8,8 @@ find_package(SFML 3 COMPONENTS Graphics Window System REQUIRED)
 
 add_executable(practica_2
     src/main.cpp
+    src/algoritmos/MergeSort.cpp
+    src/algoritmos/Graham.cpp
 )
 
 target_link_libraries(practica_2 PRIVATE
