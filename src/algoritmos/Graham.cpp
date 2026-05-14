@@ -1,9 +1,8 @@
 #include "Graham.h"
 #include "../Punto.h"
+#include "../Geometria.h"
 #include "MergeSort.h"
 #include <stack>
-#include <thread>
-#include <chrono>
 #include <algorithm>
 
 // Helper: copia el stack a un vector para poder iterar
@@ -13,89 +12,78 @@ static std::vector<Punto> stack_a_vector(std::stack<Punto> pila) {
         resultado.push_back(pila.top());
         pila.pop();
     }
-    // Invertir para tener el orden correcto (base a tope)
     std::reverse(resultado.begin(), resultado.end());
     return resultado;
 }
 
-static void dibujar_estado(Ventana& ventana, std::vector<Punto>& puntos, std::stack<Punto>& pila) {
-    ventana.iniciar();
-    ventana.render_puntos(puntos);
-
+static void dibujar_envolvente(Ventana& ventana, std::vector<Punto>& puntos, std::stack<Punto>& pila) {
     std::vector<Punto> hull = stack_a_vector(pila);
-    // Dibujar lineas entre puntos del hull
-    for (int j = 0; j < (int)hull.size() - 1; j++) {
-        ventana.render_linea(hull[j], hull[j + 1]);
-    }
-    // Dibujar puntos del hull en rojo
-    for (const auto& p : hull) {
-        ventana.render_punto_rojo(p);
-    }
-
-    ventana.display();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    ventana.dibujar_envolvente(puntos, hull);
 }
 
 void Graham::convex_hull(std::vector<Punto>& puntos, Ventana& ventana) {
 
-    if (puntos.size() < 3) {
+    int n = puntos.size();
+    if (n < 3) {
         return;
     }
 
-    // 1: Ordenar puntos
+    // 1: Ordenar puntos (el mas bajo queda en puntos[0])
     MergeSort ms;
-    ms.ordenar(puntos);
+    ms.ordenar_por_y(puntos);
+    Punto pivot = puntos[0];
 
-    std::vector<Punto> hull;
-
-    // 2: Construir la parte inferior del envolvente
-    for (int i = 0; i < (int)puntos.size(); i++) {
-        while (hull.size() >= 2) {
-            Punto second = hull[hull.size() - 2];
-            Punto top = hull[hull.size() - 1];
-            float orient = orientacion_tripleta(second, top, puntos[i]);
-            if (orient < 0) {
-                break;
-            }
-            hull.pop_back();
-            // Convertir hull a stack para dibujar
-            std::stack<Punto> pila_temp;
-            for (const auto& p : hull) pila_temp.push(p);
-            dibujar_estado(ventana, puntos, pila_temp);
-        }
-        hull.push_back(puntos[i]);
-        std::stack<Punto> pila_temp;
-        for (const auto& p : hull) pila_temp.push(p);
-        dibujar_estado(ventana, puntos, pila_temp);
+    // 2: Ordenar los n-1 puntos restantes por angulo polar respecto a pivot
+    std::vector<Punto> restantes(puntos.begin() + 1, puntos.end());
+    ms.ordenar_por_angulo(restantes, pivot);
+    for (int i = 0; i < (int)restantes.size(); i++) {
+        puntos[i + 1] = restantes[i];
     }
 
-    // 3: Construir la parte superior del envolvente
-    int lower_size = hull.size();
-    for (int i = (int)puntos.size() - 2; i >= 0; i--) {
-        while ((int)hull.size() > lower_size) {
-            Punto second = hull[hull.size() - 2];
-            Punto top = hull[hull.size() - 1];
-            float orient = orientacion_tripleta(second, top, puntos[i]);
+    // 3: Eliminar puntos con el mismo angulo excepto el mas lejano
+    std::vector<Punto> filtrados;
+    filtrados.push_back(puntos[0]);
+    for (int i = 1; i < n; i++) {
+        // Saltar puntos con mismo angulo que el siguiente (quedarse con el ultimo = mas lejano)
+        while (i < n - 1 && Geometria::orientacion_tripleta(pivot, puntos[i], puntos[i + 1]) == 0) {
+            i++;
+        }
+        filtrados.push_back(puntos[i]);
+    }
+
+    int m = filtrados.size();
+    if (m < 3) {
+        return;
+    }
+
+    // 5: Crear pila y empujar los 3 primeros
+    std::stack<Punto> pila;
+    pila.push(filtrados[0]);
+    pila.push(filtrados[1]);
+    pila.push(filtrados[2]);
+
+    dibujar_envolvente(ventana, puntos, pila);
+
+    // 6: Procesar los m-3 puntos restantes
+    for (int i = 3; i < m; i++) {
+        // 6.1: Quitar puntos mientras no giren a la izquierda (antihorario)
+        while (pila.size() > 1) {
+            Punto top = pila.top();
+            pila.pop();
+            Punto second = pila.top();
+            pila.push(top);
+
+            float orient = Geometria::orientacion_tripleta(second, top, filtrados[i]);
             if (orient < 0) {
+                // Giro antihorario: top es valido
                 break;
             }
-            hull.pop_back();
-            std::stack<Punto> pila_temp;
-            for (const auto& p : hull) pila_temp.push(p);
-            dibujar_estado(ventana, puntos, pila_temp);
+            // Giro horario o colineal: sacamos top
+            pila.pop();
+            dibujar_envolvente(ventana, puntos, pila);
         }
-        hull.push_back(puntos[i]);
-        std::stack<Punto> pila_temp;
-        for (const auto& p : hull) pila_temp.push(p);
-        dibujar_estado(ventana, puntos, pila_temp);
+        // 6.2: Empujar punto actual
+        pila.push(filtrados[i]);
+        dibujar_envolvente(ventana, puntos, pila);
     }
-}
-
-// Si devuelve valor positivo rota en sentido horario, y valor negativo antihorario. 
-float Graham::orientacion_tripleta(Punto p, Punto q, Punto r) {
-    return (q.y-p.y)*(r.x-q.x) -(q.x-p.x)*(r.y-q.y);
-}
-
-float Graham::distancia(Punto p, Punto q) {
-    return 0.0f;
 }

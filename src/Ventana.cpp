@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <thread>
+#include <chrono>
 #include "Punto.h"
 #include "Ventana.h"
 
@@ -11,15 +13,15 @@ Ventana::Ventana()
 }
 
 void Ventana::iniciar() {
-    process_events();
+    procesar();
     window.clear(sf::Color::Black);
 }
 
-void Ventana::display() {
+void Ventana::mostrar() {
     window.display();
 }
 
-void Ventana::process_events() {
+void Ventana::procesar() {
     while (const std::optional event = window.pollEvent())
     {
         if (event->is<sf::Event::Closed>())
@@ -31,7 +33,7 @@ bool Ventana::esta_abierta() {
     return window.isOpen();
 }
 
-void Ventana::render_punto_rojo(Punto punto) {
+void Ventana::dibujar_punto_rojo(Punto punto) {
     sf::CircleShape dot(5.f);
     dot.setFillColor(sf::Color::Red);
     dot.setOrigin({5.f, 5.f});
@@ -39,7 +41,7 @@ void Ventana::render_punto_rojo(Punto punto) {
     window.draw(dot);
 }
 
-void Ventana::render_puntos(std::vector<Punto>& puntos) {
+void Ventana::dibujar_puntos(std::vector<Punto>& puntos) {
     sf::CircleShape dot(5.f);
     dot.setFillColor(sf::Color::White);
     dot.setOrigin({5.f, 5.f});
@@ -51,10 +53,29 @@ void Ventana::render_puntos(std::vector<Punto>& puntos) {
     }
 }
 
-void Ventana::render_linea(Punto a, Punto b) {
+void Ventana::dibujar_linea(Punto a, Punto b) {
     sf::Vertex line[] = {
         sf::Vertex{sf::Vector2f{static_cast<float>(a.x), static_cast<float>(a.y)}, sf::Color::Green},
         sf::Vertex{sf::Vector2f{static_cast<float>(b.x), static_cast<float>(b.y)}, sf::Color::Green}
     };
     window.draw(line, 2, sf::PrimitiveType::Lines);
+}
+
+void Ventana::dibujar_envolvente(std::vector<Punto>& puntos, std::vector<Punto>& envolvente) {
+    iniciar();
+    dibujar_puntos(puntos);
+
+    for (int j = 0; j < (int)envolvente.size() - 1; j++) {
+        dibujar_linea(envolvente[j], envolvente[j + 1]);
+    }
+    // Cerrar el hull si tiene mas de 2 puntos
+    if (envolvente.size() > 2) {
+        dibujar_linea(envolvente.back(), envolvente.front());
+    }
+    for (const Punto& p : envolvente) {
+        dibujar_punto_rojo(p);
+    }
+
+    mostrar();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
